@@ -40,7 +40,8 @@ public class ListagemAlunosController implements Initializable {
             public void handle(ActionEvent t) {
                 try{
                    switchToProfessor();                 
-                }catch(IOException e){         
+                }catch(IOException e){
+                   System.out.println(e.getMessage());
                 }
                             
             }

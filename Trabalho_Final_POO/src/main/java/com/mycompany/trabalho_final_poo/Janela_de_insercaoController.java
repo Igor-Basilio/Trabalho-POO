@@ -5,15 +5,18 @@
 package com.mycompany.trabalho_final_poo;
 
 import com.mycompany.trabalho_final_poo.Atividades.AtividadeInfo;
-import com.mycompany.trabalho_final_poo.Atividades.AtividadeTipo;
+import com.mycompany.trabalho_final_poo.Atividades.AtividadesAlunoSingleton;
 import com.mycompany.trabalho_final_poo.Atividades.AtividadesSingleton;
+import static com.mycompany.trabalho_final_poo.Atividades.AtividadesSingleton.addAtividade_info;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.ResourceBundle;
@@ -29,6 +32,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
 
@@ -41,7 +45,7 @@ public class Janela_de_insercaoController implements Initializable {
 
     @FXML
     private ListView<String> ativselecionarList;
-    private List<String> atividades = new ArrayList();
+    private List<String> atividades = new LinkedList();
     private ObservableList<String> obsAtividades;
     
     @FXML
@@ -52,6 +56,14 @@ public class Janela_de_insercaoController implements Initializable {
     private Button cancelarBtn;
     @FXML
     private Label textoLabel;
+    @FXML
+    private Button cienciaBtn;
+    @FXML
+    private Button engenhariaBtn;
+    @FXML
+    private Label tempotypeLabel;
+    @FXML
+    private TextField tempoTXT;
     
     /**
      * Initializes the controller class.
@@ -64,14 +76,19 @@ public class Janela_de_insercaoController implements Initializable {
     }
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO      
-
+        // TODO
+        try{
+           loadAtividades(AtividadesSingleton.getAtividade_info_engenharia()); // Da Load do Default value in listView com as informações da engenharia.        
+        }catch(IOException e){
+           System.out.println(e.getMessage());
+        }  
         cancelarBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
                 try{
                    switchToAluno();                 
-                }catch(IOException e){         
+                }catch(IOException e){ 
+                   System.out.println(e.getMessage()); 
                 }                        
             }
         });   
@@ -83,67 +100,96 @@ public class Janela_de_insercaoController implements Initializable {
                 }else{
                     textoLabel.setText("");
                     if(linkcompTXT.getText().isEmpty())
-                       textoLabel.setText("Porfavor coloque um link valido!"); 
-                    else{ 
+                       textoLabel.setText("Porfavor preencha todos os campos validos!");                                                  
+                    else{                       
+                       AtividadesAlunoSingleton Instance = AtividadesAlunoSingleton.getInstance(); 
                        
+                       List<AtividadeInfo> M = AtividadesSingleton.getAtividade_info_engenharia();
                        
-                        
+                       List<AtividadeInfo> i = AtividadesAlunoSingleton.getAtividadesAlunolist();
+                       
+                       ListIterator<AtividadeInfo> l = M.listIterator();
+                       
+                       while(l.hasNext()){
+                           AtividadeInfo current = l.next();
+                           if(ativselecionarList.getSelectionModel().getSelectedItem().equalsIgnoreCase(current.getNomeAtividade())){
+                              AtividadeInfo A = new AtividadeInfo();
+                              try{
+                                  A.setComprovante_link(linkcompTXT.getText());
+                                  A.setHoras(Integer.parseInt(tempoTXT.getText()));
+                                  A.setId_atividade(current.getId_atividade());
+                                  A.setMax_horas(current.getMax_horas());
+                                  A.setNomeAtividade(current.getNomeAtividade());
+                                  A.setTipo(current.getTipo());
+                              }catch(NumberFormatException e){
+                                  System.out.println(e.getMessage());
+                              }
+                                  Instance.addAtividade_info(A);                            
+                           }                                                    
+                       }                     
                        try{
                           switchToAluno();                 
-                       }catch(IOException e){         
-                       }                   
-                    }                       
-               }         
-                
+                       }catch(IOException e){ 
+                          System.out.println(e.getMessage()); 
+                       }                         
+                    }                    
+               }                        
            }
         });
-        loadAtividades();
-             
+        ativselecionarList.setOnMouseClicked(new EventHandler<MouseEvent>(){
+             @Override
+             public void handle(MouseEvent mouseEvent) {
+                  if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+                      String t = ativselecionarList.getSelectionModel().getSelectedItem();
+                      if(t != null){       
+                         ListIterator<AtividadeInfo> iterador = AtividadesSingleton.getAtividade_info_engenharia().listIterator();
+                         while(iterador.hasNext()){
+                               AtividadeInfo i = iterador.next();
+                               if(i.getNomeAtividade().equalsIgnoreCase(t))
+                                  tempotypeLabel.setText(i.getTipo().toString());
+                         }                       
+                      }
+                  }
+             }         
+        });
+        
+        
+        
+        engenhariaBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent t) {
+                try {                    
+                    loadAtividades(AtividadesSingleton.getAtividade_info_engenharia());
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }); 
+        cienciaBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent t) {             
+                try {                    
+                    loadAtividades(AtividadesSingleton.getAtividade_info_ciencia());
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });            
     }
     
-    public void loadAtividades(){           
-        AtividadeTipo tipo;
-        String filename = "C:\\Users\\igrob\\OneDrive\\Área de Trabalho\\Trabalho Final POO\\Trabalho_Final_POO\\src\\main\\resources\\dados\\AtividadesEngenharia.csv";
-        File file = new File(filename); 
-        try{
-           Scanner inputstream = new Scanner(file); 
-           inputstream.nextLine();
-           while(inputstream.hasNextLine()){
-                 AtividadeInfo atividade = new AtividadeInfo();
-                 String data = inputstream.nextLine(); 
-                 String values[] = data.split(",");
-                 
-                 int ID = Integer.parseInt(values[0]);  
-                 int horas = Integer.parseInt(values[3]);
-                 int horas_maximas = Integer.parseInt(values[4]);
-                                
-                 if(values[2].equalsIgnoreCase("Horas"))                                      
-                     tipo = AtividadeTipo.Horas;
-                 else if(values[2].equalsIgnoreCase("Semestre"))
-                     tipo = AtividadeTipo.Semestre;
-                 else
-                     tipo = AtividadeTipo.Unidade;
-                                             
-                 atividade.setHoras(horas);
-                 atividade.setNomeAtividade(values[1]); // Values[1] ( nome ) já String não precisa converter.
-                 atividade.setTipo(tipo);
-                 atividade.setMax_horas(horas_maximas);
-                 atividade.setId_atividade(ID);
-                 
-                 AtividadesSingleton.getInstance().addAtividade_info(atividade);
-           }
-           inputstream.close();
-        }catch(FileNotFoundException e){          
-        }
-             
-        ListIterator<AtividadeInfo> iterador = AtividadesSingleton.getInstance().getAtividade_info().listIterator();
+    public void loadAtividades(List<AtividadeInfo> atividadesList) throws IOException{
+        
+        atividades.clear();
+        ListIterator<AtividadeInfo> iterador = atividadesList.listIterator();
         
         while(iterador.hasNext()){
-            atividades.add(iterador.next().getNomeAtividade());
-        }     
+            AtividadeInfo t = iterador.next();
+            atividades.add(t.getId_atividade()+ "  " + t.getNomeAtividade());
+        }   
         
         obsAtividades = FXCollections.observableArrayList(atividades);
 
-        ativselecionarList.setItems(obsAtividades);
+        ativselecionarList.getItems().clear();
+        ativselecionarList.setItems(obsAtividades);  // Actual list que aparecerá na tela.
     }   
 }

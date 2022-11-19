@@ -44,7 +44,8 @@ public class PrimaryController implements Initializable {
             public void handle(ActionEvent t) {
                 try{
                    switchToProfessor();                 
-                }catch(IOException e){         
+                }catch(IOException e){ 
+                   System.out.println(e.getMessage()); 
                 }
                             
             }
@@ -54,7 +55,8 @@ public class PrimaryController implements Initializable {
             public void handle(ActionEvent t) {
                 try{
                    switchToAluno();                 
-                }catch(IOException e){                   
+                }catch(IOException e){   
+                   System.out.println(e.getMessage()); 
                 }
                             
             }

@@ -55,7 +55,8 @@ public class ProfessorController implements Initializable {
             public void handle(ActionEvent t) {
                 try{
                    switchToPrimary();                 
-                }catch(IOException e){         
+                }catch(IOException e){
+                   System.out.println(e.getMessage()); 
                 }
                             
             }
@@ -65,7 +66,8 @@ public class ProfessorController implements Initializable {
             public void handle(ActionEvent t) {
                 try{
                    switchToListagem();                 
-                }catch(IOException e){         
+                }catch(IOException e){
+                   System.out.println(e.getMessage()); 
                 }
                             
             }
@@ -75,7 +77,8 @@ public class ProfessorController implements Initializable {
             public void handle(ActionEvent t) {
                 try{
                    switchToContabilizacao();                 
-                }catch(IOException e){         
+                }catch(IOException e){
+                   System.out.println(e.getMessage()); 
                 }
                             
             }

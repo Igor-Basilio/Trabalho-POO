@@ -4,9 +4,16 @@
  */
 package com.mycompany.trabalho_final_poo;
 
+import com.mycompany.trabalho_final_poo.Atividades.AtividadeInfo;
+import com.mycompany.trabalho_final_poo.Atividades.AtividadesAlunoSingleton;
 import java.io.IOException;
 import java.net.URL;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.ResourceBundle;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -35,7 +42,11 @@ public class AlunoController implements Initializable {
     @FXML
     private TextField previformaTXT;
     @FXML
-    private ListView<?> atividadesList;
+    private ListView<String> atividadesAlunoList;
+    private List<String> atividades = new LinkedList();
+    private ObservableList<String> obsAtividades;
+    
+    
     @FXML
     private Button inserirBtn;
     @FXML
@@ -54,13 +65,19 @@ public class AlunoController implements Initializable {
     }
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
+        try {
+            AtividadesAlunoSingleton.getInstance();
+            loadAtividades(AtividadesAlunoSingleton.getAtividadesAlunolist());
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
         inserirBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
                 try{
                    switchToInsercao();                 
-                }catch(IOException e){         
+                }catch(IOException e){
+                   System.out.println(e.getMessage());
                 }
                             
             }
@@ -70,10 +87,26 @@ public class AlunoController implements Initializable {
             public void handle(ActionEvent t) {
                 try{
                    switchToPrimary();                 
-                }catch(IOException e){         
+                }catch(IOException e){     
+                   System.out.println(e.getMessage()); 
                 }
                             
             }
-        });
-    }      
+        });     
+    }   
+    public void loadAtividades(List<AtividadeInfo> atividadesList) throws IOException{
+        
+        atividades.clear();
+        ListIterator<AtividadeInfo> iterador = atividadesList.listIterator();
+       
+        while(iterador.hasNext()){
+            AtividadeInfo t = iterador.next();
+            atividades.add(t.getId_atividade()+ "  " + t.getNomeAtividade());
+        }   
+        
+        obsAtividades = FXCollections.observableArrayList(atividades);
+
+        atividadesAlunoList.getItems().clear();
+        atividadesAlunoList.setItems(obsAtividades);  // Actual list que aparecerá na tela.
+    }  
 }
